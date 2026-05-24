@@ -89,21 +89,6 @@ static char *extract_word(const char *input, int *i) {
     return substr(input, start, *i - start);
 }
 
-static char *get_env_var(char *name, char **env) {
-    int i = 0;
-    const size_t len = strlen(name);
-    while (env[i]) {
-        if (strncmp(env[i], name, len) == 0 && env[i][len] == '=') {
-            char *value = strdup(env[i] + len + 1);
-            free(name);
-            return value;
-        }
-        i++;
-    }
-    free(name);
-    return strdup("");
-}
-
 static char *expand_variable(const char *word, int *i, const shell_t *shell) {
     (*i)++;
     if (word[*i] == '?') {

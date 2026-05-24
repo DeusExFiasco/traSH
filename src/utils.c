@@ -86,3 +86,66 @@ char *itoa(const int n) {
     }
     return str;
 }
+
+char *get_env_var(char *name, char **env) {
+    int i = 0;
+    const size_t len = strlen(name);
+    while (env[i]) {
+        if (strncmp(env[i], name, len) == 0 && env[i][len] == '=') {
+            char *value = strdup(env[i] + len + 1);
+            free(name);
+            return value;
+        }
+        i++;
+    }
+    free(name);
+    return strdup("");
+}
+
+void free_tokens(token_t *tokens) {
+    while (tokens) {
+        token_t *next = tokens->next;
+        free(tokens->value);
+        free(tokens);
+        tokens = next;
+    }
+}
+
+void free_ast(ast_node_t *node) {
+    if (!node)
+        return;
+    if (node->node_type == AST_COMMAND) {
+        if (node->args) {
+            for (int i = 0; node->args[i]; ++i)
+                free(node->args[i]);
+            free(node->args);
+        }
+        while (node->redirs) {
+            redirection_t *next = node->redirs->next;
+            free(node->redirs->target);
+            free(node->redirs);
+            node->redirs = next;
+        }
+    } else {
+        free_ast(node->left);
+        free_ast(node->right);
+    }
+    free(node);
+}
+
+void clean_up(shell_t *shell) {
+    if (!shell)
+        return;
+    if (shell->input) {
+        free(shell->input);
+        shell->input = nullptr;
+    }
+    if (shell->tokens) {
+        free_tokens(shell->tokens);
+        shell->tokens = nullptr;
+    }
+    if (shell->ast) {
+        free_ast(shell->ast);
+        shell->ast = nullptr;
+    }
+}

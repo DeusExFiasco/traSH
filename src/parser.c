@@ -43,7 +43,7 @@ static redirection_t *new_redir(token_type_t redir_type, char *target) {
     if (!redir)
         return nullptr;
     redir->redir_type = redir_type;
-    redir->target = target;
+    redir->target = strdup(target);
     redir->next = nullptr;
     return redir;
 }
@@ -75,8 +75,10 @@ static ast_node_t *parse_command(token_t **current, shell_t *shell) {
             const token_type_t redir_type = token->type;
             advance(current);
             token = current_token(current);
-            if (!token || token->type != TK_WORD)
-                handle_error(INVALID_PATH, current_token(current)->value, shell);
+            if (!token || token->type != TK_WORD) {
+                handle_error(SYNTAX_ERROR, current_token(current)->value, shell);
+                return nullptr;
+            }
             redirection_t *redirection = new_redir(redir_type, token->value);
             if (!redirection)
                 handle_fatal_error(MEMORY_ERROR, nullptr, shell);

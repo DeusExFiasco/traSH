@@ -2,17 +2,16 @@
 
 const char *token_to_str(const token_t token) {
     switch (token.type) {
-        case TK_WORD: return "WORD";
-        case TK_PIPE: return "PIPE";
-        case TK_REDIR_IN: return "REDIR_IN";
-        case TK_REDIR_OUT: return "REDIR_OUT";
-        case TK_APPEND: return "APPEND";
-        case TK_HEREDOC: return "HEREDOC";
-        case TK_OR: return "OR";
-        case TK_AND: return "AND";
-        case TK_SEMICOLON: return "SEMICOLON";
-        case TK_EOF: return "EOF";
-        default: return "ERROR";
+    case TK_WORD: return "WORD";
+    case TK_PIPE: return "PIPE";
+    case TK_REDIR_IN: return "REDIR_IN";
+    case TK_REDIR_OUT: return "REDIR_OUT";
+    case TK_APPEND: return "APPEND";
+    case TK_HEREDOC: return "HEREDOC";
+    case TK_OR: return "OR";
+    case TK_AND: return "AND";
+    case TK_SEMICOLON: return "SEMICOLON";
+    default: return "EOF";
     }
 }
 

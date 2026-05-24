@@ -9,11 +9,15 @@ static void shell_loop(shell_t *shell) {
         if (shell->input[0] == '\0')
             continue;
         shell->tokens = tokenize_input(shell);
-        print_tokens(shell->tokens);
-        shell->ast = parse_tokens(shell);
-        print_ast(shell->ast);
-        // execute ast
-        // loop back
+        if (shell->tokens) {
+            //print_tokens(shell->tokens);
+            shell->ast = parse_tokens(shell);
+            if (shell->ast) {
+                //print_ast(shell->ast);
+                shell->last_status = execute(shell);
+            }
+        }
+        clean_up(shell);
     }
 }
 

@@ -10,6 +10,8 @@
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
+#include <sys/wait.h>
 #include <readline/readline.h>
 
 #include "tokenizer.h"
@@ -38,6 +40,10 @@ typedef enum error {
 
 token_t *tokenize_input(shell_t *shell);
 ast_node_t *parse_tokens(shell_t *shell);
+int execute(shell_t *shell);
+
+char *get_env_var(char *name, char **env);
+void clean_up(shell_t *shell);
 
 void free_tokens(token_t *tokens);
 void free_ast(ast_node_t *node);
