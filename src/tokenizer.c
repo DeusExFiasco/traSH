@@ -11,6 +11,8 @@ static bool is_operator(const char c) {
 }
 
 static token_t *create_token(const token_type_t type, char *value) {
+    if (!value && type != TK_EOF)
+        return nullptr;
     token_t* token = malloc(sizeof(token_t));
     if (!token)
         return nullptr;
@@ -159,7 +161,7 @@ static char *process_word(const char *raw, const shell_t *shell) {
     return result;
 }
 
-token_t *tokenize_input(const shell_t *shell) {
+token_t *tokenize_input(shell_t *shell) {
     token_t *tokens = nullptr;
     token_t *new_token;
     const char *input = shell->input;
@@ -174,10 +176,12 @@ token_t *tokenize_input(const shell_t *shell) {
             new_token = read_operator(input, &i);
         else {
             const char *raw_word = extract_word(input, &i);
+            if (!raw_word)
+                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
             new_token = create_token(TK_WORD, process_word(raw_word, shell));
         }
         if (!new_token)
-            return nullptr;
+            handle_fatal_error(MEMORY_ERROR, nullptr, shell);
         add_token(&tokens, new_token);
     }
     add_token(&tokens, create_token(TK_EOF, nullptr));

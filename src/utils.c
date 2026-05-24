@@ -86,25 +86,3 @@ char *itoa(const int n) {
     }
     return str;
 }
-
-void free_ast(ast_node_t *node) {
-    if (!node)
-        return;
-    if (node->node_type == AST_COMMAND) {
-        if (node->args) {
-            for (int i = 0; node->args[i]; ++i)
-                free(node->args[i]);
-            free(node->args);
-        }
-        while (node->redirs) {
-            redirection_t *next = node->redirs->next;
-            free(node->redirs->target);
-            free(node->redirs);
-            node->redirs = next;
-        }
-    } else {
-        free_ast(node->left);
-        free_ast(node->right);
-    }
-    free(node);
-}

@@ -48,7 +48,7 @@ static redirection_t *new_redir(token_type_t redir_type, char *target) {
     return redir;
 }
 
-static ast_node_t *parse_command(token_t **current) {
+static ast_node_t *parse_command(token_t **current, shell_t *shell) {
     token_t *token = current_token(current);
     char **argv = nullptr;
     size_t argc = 0;
@@ -59,11 +59,11 @@ static ast_node_t *parse_command(token_t **current) {
         if (token->type == TK_WORD) {
             char *val = strdup(token->value ? token->value : "");
             if (!val)
-                exit(EXIT_FAILURE);// handle missing token and fail
+                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
             char **new_argv = realloc(argv, sizeof(char *) * (argc + 2));
             if (!new_argv) {
                 free(val);
-                exit(EXIT_FAILURE);// handle memory error and fail
+                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
             }
             argv = new_argv;
             argv[argc++] = val;
@@ -76,10 +76,10 @@ static ast_node_t *parse_command(token_t **current) {
             advance(current);
             token = current_token(current);
             if (!token || token->type != TK_WORD)
-                exit(EXIT_FAILURE);// handle missing redir target error and fail
+                handle_error(INVALID_PATH, current_token(current)->value, shell);
             redirection_t *redirection = new_redir(redir_type, token->value);
             if (!redirection)
-                exit(EXIT_FAILURE);// handle memory error and fail
+                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
             if (!redirs)
                 redirs = redirs_tail = redirection;
             else {
@@ -90,7 +90,7 @@ static ast_node_t *parse_command(token_t **current) {
             token = current_token(current);
         }
 
-        if (token->type == TK_PIPE || token->type == TK_AND || token->type == TK_OR ||
+        if (!token || token->type == TK_PIPE || token->type == TK_AND || token->type == TK_OR ||
             token->type == TK_SEMICOLON || token->type == TK_EOF) {
             break;
         }
@@ -98,13 +98,13 @@ static ast_node_t *parse_command(token_t **current) {
     return new_command_node(argv, redirs);
 }
 
-static ast_node_t *parse_pipe(token_t **current) {
-    ast_node_t *left = parse_command(current);
+static ast_node_t *parse_pipe(token_t **current, shell_t *shell) {
+    ast_node_t *left = parse_command(current, shell);
     if (!left)
         return nullptr;
     while (current_type(current) == TK_PIPE) {
         advance(current);
-        ast_node_t *right = parse_command(current);
+        ast_node_t *right = parse_command(current, shell);
         if (!right) {
             free_ast(left);
             return nullptr;
@@ -114,14 +114,14 @@ static ast_node_t *parse_pipe(token_t **current) {
     return left;
 }
 
-static ast_node_t *parse_logical(token_t **current) {
-    ast_node_t *left = parse_pipe(current);
+static ast_node_t *parse_logical(token_t **current, shell_t *shell) {
+    ast_node_t *left = parse_pipe(current, shell);
     if (!left)
         return nullptr;
     while (current_type(current) == TK_AND || current_type(current) == TK_OR) {
         const token_type_t token_type = current_type(current);
         advance(current);
-        ast_node_t *right = parse_pipe(current);
+        ast_node_t *right = parse_pipe(current, shell);
         if (!right) {
             free_ast(left);
             return nullptr;
@@ -131,13 +131,13 @@ static ast_node_t *parse_logical(token_t **current) {
     return left;
 }
 
-static ast_node_t *parse_sequence(token_t **current) {
-    ast_node_t *left = parse_logical(current);
+static ast_node_t *parse_sequence(token_t **current, shell_t *shell) {
+    ast_node_t *left = parse_logical(current, shell);
     if (!left)
         return nullptr;
     while (current_type(current) == TK_SEMICOLON) {
         advance(current);
-        ast_node_t *right = parse_logical(current);
+        ast_node_t *right = parse_logical(current, shell);
         if (!right) {
             free_ast(left);
             return nullptr;
@@ -147,9 +147,9 @@ static ast_node_t *parse_sequence(token_t **current) {
     return left;
 }
 
-ast_node_t *parse_tokens(token_t *tokens) {
-    token_t *current = tokens;
-    ast_node_t *root = parse_sequence(&current);
+ast_node_t *parse_tokens(shell_t *shell) {
+    token_t *current = shell->tokens;
+    ast_node_t *root = parse_sequence(&current, shell);
     (void)current;
     return root;
 }

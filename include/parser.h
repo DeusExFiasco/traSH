@@ -25,6 +25,4 @@ typedef struct ast_node {
     struct ast_node *right;
 } ast_node_t;
 
-void free_ast(ast_node_t *node);
-
 #endif //MINISHELL_PARSER_H

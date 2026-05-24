@@ -2,11 +2,6 @@
 #define MINISHELL_TOKENIZER_H
 
 // ReSharper disable CppUnusedIncludeDirective
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdbool.h>
 
 typedef enum token_type {
     TK_WORD, // any string

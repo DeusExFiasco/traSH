@@ -4,16 +4,14 @@ static void shell_loop(shell_t *shell) {
     while (true) {
         shell->input = readline("$ ");
 
-        if (shell->input == NULL) {
+        if (shell->input == NULL)
             break;
-        }
-        if (shell->input[0] == '\0') {
+        if (shell->input[0] == '\0')
             continue;
-        }
-        token_t *tokens = tokenize_input(shell);
-        print_tokens(tokens);
-        ast_node_t *ast = parse_tokens(tokens);
-        print_ast(ast);
+        shell->tokens = tokenize_input(shell);
+        print_tokens(shell->tokens);
+        shell->ast = parse_tokens(shell);
+        print_ast(shell->ast);
         // execute ast
         // loop back
     }
