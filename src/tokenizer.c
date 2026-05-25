@@ -132,6 +132,14 @@ static char *process_word(const char *raw, const bool is_delim, const shell_t *s
         if ((raw[i] == '\'' && state != QUOTE_DOUBLE) || (raw[i] == '"' && state != QUOTE_SINGLE)) {
             update_quote_state(raw[i], &state);
             i++;
+        } else if (!is_delim && raw[i] == '~' && state == QUOTE_NONE && strlen(raw) == 1) {
+            char *home = get_env_var(strdup("HOME"), shell->env);
+            if (home) {
+                result = append_str(result, home);
+                free(home);
+            } else
+                result = append_char(result, raw[i]);
+            i++;
         } else if (!is_delim && raw[i] == '$' && state != QUOTE_SINGLE) {
             char *expanded = expand_variable(raw, &i, shell);
             if (expanded) {

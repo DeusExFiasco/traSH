@@ -3,11 +3,11 @@
 static void shell_loop(shell_t *shell) {
     while (true) {
         shell->input = readline("$ ");
-
         if (shell->input == NULL)
             break;
         if (shell->input[0] == '\0')
             continue;
+        add_history(shell->input);
         shell->tokens = tokenize_input(shell);
         if (shell->tokens) {
             //print_tokens(shell->tokens);

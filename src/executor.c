@@ -82,6 +82,14 @@ static char *resolve_command(const char *cmd, char **env) {
     return nullptr;
 }
 
+static bool is_builtin(const char *cmd) {
+    return cmd && (
+        strcmp(cmd, "cd") == 0 ||
+        strcmp(cmd, "exit") == 0
+        // TODO: add the rest when we have them
+    );
+}
+
 static int wait_status(const pid_t pid) {
     int status = 0;
     waitpid(pid, &status, 0);
@@ -148,9 +156,21 @@ static int exec_child(ast_node_t *node, shell_t *shell) {
     return shell->last_status;
 }
 
+static int exec_builtin(char **argv, shell_t *shell) {
+    if (!argv[0])
+        return 0;
+    if (strcmp(argv[0], "cd") == 0)
+        return builtin_cd(argv, shell);
+    if (strcmp(argv[0], "exit") == 0)
+        return builtin_exit(argv, shell);
+    return 1;
+}
+
 static int exec_command(ast_node_t *node, shell_t *shell) {
     if (!node->args || !node->args[0])
         return 0;
+    if (is_builtin(node->args[0]))
+        return exec_builtin(node->args, shell);
     const pid_t pid = fork();
     if (pid < 0)
         handle_fatal_error(FORK_FAIL, nullptr, shell);

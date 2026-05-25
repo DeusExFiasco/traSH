@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 
 #include "tokenizer.h"
 #include "parser.h"
@@ -42,6 +43,9 @@ typedef enum error {
 token_t *tokenize_input(shell_t *shell);
 ast_node_t *parse_tokens(shell_t *shell);
 int execute(shell_t *shell);
+
+int builtin_cd(char **argv, shell_t *shell);
+int builtin_exit(char **argv, shell_t *shell);
 
 char *get_env_var(char *name, char **env);
 void clean_up(shell_t *shell);

@@ -87,21 +87,6 @@ char *itoa(const int n) {
     return str;
 }
 
-char *get_env_var(char *name, char **env) {
-    int i = 0;
-    const size_t len = strlen(name);
-    while (env[i]) {
-        if (strncmp(env[i], name, len) == 0 && env[i][len] == '=') {
-            char *value = strdup(env[i] + len + 1);
-            free(name);
-            return value;
-        }
-        i++;
-    }
-    free(name);
-    return strdup("");
-}
-
 void free_tokens(token_t *tokens) {
     while (tokens) {
         token_t *next = tokens->next;
