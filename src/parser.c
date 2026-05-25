@@ -76,7 +76,7 @@ static ast_node_t *parse_command(token_t **current, shell_t *shell) {
             advance(current);
             token = current_token(current);
             if (!token || token->type != TK_WORD) {
-                handle_error(SYNTAX_ERROR, current_token(current)->value, shell);
+                handle_error(SYNTAX_ERROR, token ? token->value : nullptr, shell);
                 return nullptr;
             }
             redirection_t *redirection = new_redir(redir_type, token->value);

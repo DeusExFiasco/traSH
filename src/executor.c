@@ -51,9 +51,63 @@ static int wait_status(const pid_t pid) {
     return status;
 }
 
-static int exec_child(ast_node_t *node, shell_t *shell) {
-    // TODO: Handle redirections here!
+static int create_heredoc(const char *eof) {
+    int fds[2];
+    if (pipe(fds) < 0)
+        return -1;
+    while (true) {
+        char *line = readline(" > ");
+        if (!line)
+            break;
+        if (strcmp(line, eof) == 0) {
+            free(line);
+            break;
+        }
+        write(fds[1], line, strlen(line));
+        write(fds[1], "\n", 1);
+        free(line);
+    }
+    close(fds[1]);
+    return fds[0];
+}
 
+static bool apply_redirections(redirection_t *redir, shell_t *shell) {
+    while (redir) {
+        int fd = -1;
+        if (redir->redir_type == TK_REDIR_IN)
+            fd = open(redir->target, O_RDONLY);
+        else if (redir->redir_type == TK_REDIR_OUT)
+            fd = open(redir->target, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        else if (redir->redir_type == TK_APPEND)
+            fd = open(redir->target, O_WRONLY | O_CREAT | O_APPEND, 0644);
+        else if (redir->redir_type == TK_HEREDOC) { // FIXME: HEREDOC before PIPE freezes shell!
+            int heredoc_fd = create_heredoc(redir->target);
+            if (heredoc_fd < 0) {
+                handle_error(INVALID_PATH, redir->target, shell);
+                return false;
+            }
+            dup2(heredoc_fd, STDIN_FILENO);
+            close(heredoc_fd);
+            redir = redir->next;
+            continue;
+        }
+        if (fd < 0) {
+            handle_error(INVALID_PATH, redir->target, shell);
+            return false;
+        }
+        if (redir->redir_type == TK_REDIR_IN)
+            dup2(fd, STDIN_FILENO);
+        else
+            dup2(fd, STDOUT_FILENO);
+        close(fd);
+        redir = redir->next;
+    }
+    return true;
+}
+
+static int exec_child(ast_node_t *node, shell_t *shell) {
+    if (!apply_redirections(node->redirs, shell))
+        return shell->last_status;
     char *path = resolve_command(node->args[0], shell->env);
     if (!path) {
         if (strchr(node->args[0], '/'))
@@ -95,7 +149,7 @@ static int exec_pipe(const ast_node_t *node, shell_t *shell) {
         dup2(fds[1], STDOUT_FILENO);
         close(fds[0]);
         close(fds[1]);
-        exit(execute_node(node->left, shell));
+        exit(exec_child(node->left, shell));
     }
     const pid_t right_pid = fork();
     if (right_pid < 0)
@@ -104,7 +158,7 @@ static int exec_pipe(const ast_node_t *node, shell_t *shell) {
         dup2(fds[0], STDIN_FILENO);
         close(fds[0]);
         close(fds[1]);
-        exit(execute_node(node->right, shell));
+        exit(exec_child(node->right, shell));
     }
     close(fds[0]);
     close(fds[1]);

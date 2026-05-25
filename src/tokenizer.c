@@ -91,7 +91,7 @@ static char *extract_word(const char *input, int *i) {
 
 static char *expand_variable(const char *word, int *i, const shell_t *shell) {
     (*i)++;
-    if (word[*i] == '?') {
+    if (word[*i] == '?') { // FIXME: NULL character is still concatenated with word token!
         (*i)++;
         return itoa(shell->last_status);
     }
@@ -123,7 +123,7 @@ static void update_quote_state(const char c, quote_state_t *state) {
         *state = QUOTE_NONE;
 }
 
-static char *process_word(const char *raw, const shell_t *shell) {
+static char *process_word(const char *raw, const bool is_delim, const shell_t *shell) {
     char *result = nullptr;
     quote_state_t state = QUOTE_NONE;
     int i = 0;
@@ -132,7 +132,7 @@ static char *process_word(const char *raw, const shell_t *shell) {
         if ((raw[i] == '\'' && state != QUOTE_DOUBLE) || (raw[i] == '"' && state != QUOTE_SINGLE)) {
             update_quote_state(raw[i], &state);
             i++;
-        } else if (raw[i] == '$' && state != QUOTE_SINGLE) {
+        } else if (!is_delim && raw[i] == '$' && state != QUOTE_SINGLE) {
             char *expanded = expand_variable(raw, &i, shell);
             if (expanded) {
                 result = append_str(result, expanded);
@@ -150,6 +150,7 @@ token_t *tokenize_input(shell_t *shell) {
     token_t *tokens = nullptr;
     token_t *new_token;
     const char *input = shell->input;
+    bool heredoc_eof_next = false;
     int i = 0;
 
     while (input[i]) {
@@ -157,13 +158,19 @@ token_t *tokenize_input(shell_t *shell) {
             i++;
         if (!input[i])
             break;
-        if (is_operator(input[i]))
+        if (is_operator(input[i])) {
             new_token = read_operator(input, &i);
+            if (new_token && new_token-> type == TK_HEREDOC)
+                heredoc_eof_next = true;
+        }
         else {
-            const char *raw_word = extract_word(input, &i);
+            char *raw_word = extract_word(input, &i);
             if (!raw_word)
                 handle_fatal_error(MEMORY_ERROR, nullptr, shell);
-            new_token = create_token(TK_WORD, process_word(raw_word, shell));
+            new_token = create_token(TK_WORD, process_word(raw_word, heredoc_eof_next, shell));
+            if (new_token && heredoc_eof_next)
+                heredoc_eof_next = false;
+            free(raw_word);
         }
         if (!new_token)
             handle_fatal_error(MEMORY_ERROR, nullptr, shell);
