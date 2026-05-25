@@ -62,7 +62,7 @@ char *append_str(char *dst, const char *src) {
 char *itoa(const int n) {
     long num = n;
     long tmp = num;
-    int len = 1;
+    int len = (num <= 0) ? 1 : 0;
 
     while (tmp != 0) {
         tmp /= 10;

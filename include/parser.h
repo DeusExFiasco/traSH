@@ -14,6 +14,7 @@ typedef enum ast_type {
 typedef struct redirection {
     token_type_t redir_type;
     char *target;
+    int heredoc_fd;
     struct redirection *next;
 } redirection_t;
 

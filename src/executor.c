@@ -1,6 +1,47 @@
 #include "minishell.h"
 
-static int execute_node(ast_node_t *node, shell_t *shell);
+static int create_heredoc(const char *eof) {
+    int fds[2];
+    if (pipe(fds) < 0)
+        return -1;
+    while (true) {
+        char *line = readline("HEREDOC > ");
+        if (!line)
+            break;
+        if (strcmp(line, eof) == 0) {
+            free(line);
+            break;
+        }
+        write(fds[1], line, strlen(line));
+        write(fds[1], "\n", 1);
+        free(line);
+    }
+    close(fds[1]);
+    return fds[0];
+}
+
+static int prep_heredocs(ast_node_t *node, shell_t *shell) {
+    if (!node)
+        return 0;
+    if (node->node_type == AST_COMMAND) {
+        for (redirection_t *r = node->redirs; r; r = r->next) {
+            if (r->redir_type == TK_HEREDOC) {
+                int fd = create_heredoc(r->target);
+                if (fd < 0) {
+                    handle_error(INVALID_PATH, r->target, shell);
+                    return -1;
+                }
+                r->heredoc_fd = fd;
+            }
+        }
+        return 0;
+    }
+    if (prep_heredocs(node->left, shell) < 0)
+        return -1;
+    if (prep_heredocs(node->right, shell) < 0)
+        return -1;
+    return 0;
+}
 
 static char *join_path(const char *dir, const char *cmd) {
     const size_t len_dir = strlen(dir);
@@ -51,26 +92,6 @@ static int wait_status(const pid_t pid) {
     return status;
 }
 
-static int create_heredoc(const char *eof) {
-    int fds[2];
-    if (pipe(fds) < 0)
-        return -1;
-    while (true) {
-        char *line = readline(" > ");
-        if (!line)
-            break;
-        if (strcmp(line, eof) == 0) {
-            free(line);
-            break;
-        }
-        write(fds[1], line, strlen(line));
-        write(fds[1], "\n", 1);
-        free(line);
-    }
-    close(fds[1]);
-    return fds[0];
-}
-
 static bool apply_redirections(redirection_t *redir, shell_t *shell) {
     while (redir) {
         int fd = -1;
@@ -80,14 +101,14 @@ static bool apply_redirections(redirection_t *redir, shell_t *shell) {
             fd = open(redir->target, O_WRONLY | O_CREAT | O_TRUNC, 0644);
         else if (redir->redir_type == TK_APPEND)
             fd = open(redir->target, O_WRONLY | O_CREAT | O_APPEND, 0644);
-        else if (redir->redir_type == TK_HEREDOC) { // FIXME: HEREDOC before PIPE freezes shell!
-            int heredoc_fd = create_heredoc(redir->target);
-            if (heredoc_fd < 0) {
+        else if (redir->redir_type == TK_HEREDOC) {
+            if (redir->heredoc_fd < 0) {
                 handle_error(INVALID_PATH, redir->target, shell);
                 return false;
             }
-            dup2(heredoc_fd, STDIN_FILENO);
-            close(heredoc_fd);
+            dup2(redir->heredoc_fd, STDIN_FILENO);
+            close(redir->heredoc_fd);
+            redir->heredoc_fd = -1;
             redir = redir->next;
             continue;
         }
@@ -196,5 +217,7 @@ static int execute_node(ast_node_t *node, shell_t *shell) {
 
 int execute(shell_t *shell) {
     ast_node_t *root = shell->ast;
+    if (prep_heredocs(root, shell) < 0)
+        return shell->last_status;
     return execute_node(root, shell);
 }

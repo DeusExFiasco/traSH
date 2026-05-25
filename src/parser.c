@@ -44,6 +44,7 @@ static redirection_t *new_redir(token_type_t redir_type, char *target) {
         return nullptr;
     redir->redir_type = redir_type;
     redir->target = strdup(target);
+    redir->heredoc_fd = -1;
     redir->next = nullptr;
     return redir;
 }

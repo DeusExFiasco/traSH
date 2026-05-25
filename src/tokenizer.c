@@ -91,7 +91,7 @@ static char *extract_word(const char *input, int *i) {
 
 static char *expand_variable(const char *word, int *i, const shell_t *shell) {
     (*i)++;
-    if (word[*i] == '?') { // FIXME: NULL character is still concatenated with word token!
+    if (word[*i] == '?') {
         (*i)++;
         return itoa(shell->last_status);
     }
