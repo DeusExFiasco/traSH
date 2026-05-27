@@ -46,8 +46,16 @@ int execute(shell_t *shell);
 
 int builtin_cd(char **argv, shell_t *shell);
 int builtin_exit(char **argv, shell_t *shell);
+int builtin_export(char **argv, shell_t *shell);
+int builtin_unset(char **argv, shell_t *shell);
 
+char **dup_env(char **envp);
+bool is_valid_identifier(const char *str);
 char *get_env_var(char *name, char **env);
+bool set_env(char ***envp, const char *name, const char *value);
+int unset_env(char ***envp, const char *name);
+bool append_env(char ***envp, char *name, const char *suffix);
+
 void clean_up(shell_t *shell);
 
 void free_tokens(token_t *tokens);

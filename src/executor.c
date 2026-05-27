@@ -163,6 +163,10 @@ static int exec_builtin(char **argv, shell_t *shell) {
         return builtin_cd(argv, shell);
     if (strcmp(argv[0], "exit") == 0)
         return builtin_exit(argv, shell);
+    if (strcmp(argv[0], "export") == 0)
+        return builtin_export(argv, shell);
+    if (strcmp(argv[0], "unset") == 0)
+        return builtin_unset(argv, shell);
     return 1;
 }
 

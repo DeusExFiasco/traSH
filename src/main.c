@@ -25,7 +25,9 @@ int main(const int argc, char **argv, char **env) {
     (void)argc, (void)argv;
     shell_t shell = {0};
     shell.last_status = 0;
-    shell.env = env;
+    shell.env = dup_env(env);
+    if (!shell.env)
+        handle_fatal_error(ENV_NOT_FOUND, nullptr, &shell);
     shell_loop(&shell);
     return shell.last_status;
 }

@@ -1,5 +1,34 @@
 #include "minishell.h"
 
+char **dup_env(char **envp) {
+    int count = 0;
+    while (envp[count])
+        count++;
+    char **copy = malloc(sizeof(char *) * (count + 1));
+    if (!copy)
+        return nullptr;
+    for (int i = 0; i < count; ++i) {
+        copy[i] = strdup(envp[i]);
+        if (!copy[i]) {
+            // FIXME: free already allocated entries!
+            free(copy);
+            return nullptr;
+        }
+    }
+    copy[count] = nullptr;
+    return copy;
+}
+
+bool is_valid_identifier(const char *str) {
+    if (!str || !((*str == '_') || isalpha((unsigned char)*str)))
+        return false;
+    for (str++; *str; str++) {
+        if (!((*str == '_') || isalpha((unsigned char)*str)))
+            return false;
+    }
+    return true;
+}
+
 char *get_env_var(char *name, char **env) {
     int i = 0;
     const size_t len = strlen(name);
@@ -60,5 +89,21 @@ int unset_env(char ***envp, const char *name) {
             return true;
         }
     }
-    return true;
+    return false;
+}
+
+bool append_env(char ***envp, char *name, const char *suffix) {
+    const char *old = get_env_var(name, *envp);
+    if (!old)
+        old = "";
+    size_t len = strlen(old) + strlen(suffix);
+    char *merged = malloc(len + 1);
+    if (!merged)
+        return false;
+    memcpy(merged, old, strlen(old));
+    memcpy(merged + strlen(old), suffix, strlen(suffix));
+    merged[len] = '\0';
+    bool ok = set_env(envp, name, merged);
+    free(merged);
+    return ok;
 }

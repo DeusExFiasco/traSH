@@ -7,6 +7,7 @@ static void clean_exit(shell_t *shell) {
         free(shell->input);
         shell->input = nullptr;
     }
+    // FIXME: free envs!
     if (shell->tokens) {
         free_tokens(shell->tokens);
         shell->tokens = nullptr;
