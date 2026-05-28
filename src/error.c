@@ -8,9 +8,7 @@ static void clean_exit(shell_t *shell) {
         shell->input = NULL;
     }
     if (shell->env) {
-        for (int i = 0; shell->env[i]; i++)
-            free(shell->env[i]);
-        free(shell->env);
+        free_env(shell->env);
         shell->env = NULL;
     }
     if (shell->tokens) {

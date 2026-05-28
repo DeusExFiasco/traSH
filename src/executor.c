@@ -67,8 +67,7 @@ static char *resolve_command(const char *cmd, char **env) {
     char *paths = get_env_var(strdup("PATH"), env);
     if (!paths)
         return NULL;
-    char *saveptr = NULL;
-    for (char *path = strtok_r(paths, ":", &saveptr); path; path = strtok_r(NULL, ":", &saveptr)) {
+    for (char *path = strtok(paths, ":"); path; path = strtok(NULL, ":")) {
         char *candidate = join_path(path, cmd);
         if (!candidate)
             continue;

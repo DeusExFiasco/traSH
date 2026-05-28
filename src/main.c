@@ -105,12 +105,15 @@ int main(const int argc, char **argv, char **env) {
         handle_fatal_error(ENV_NOT_FOUND, NULL, &shell);
     if (argc > 1) {
         run_line(&shell, argv[1]);
+        free_env(shell.env);
         return shell.last_status;
     }
     if (!isatty(STDIN_FILENO)) {
         run_batch(&shell);
+        free_env(shell.env);
         return shell.last_status;
     }
     shell_loop(&shell);
+    free_env(shell.env);
     return shell.last_status;
 }

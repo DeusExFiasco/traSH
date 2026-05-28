@@ -10,7 +10,7 @@ char **dup_env(char **envp) {
     for (int i = 0; i < count; ++i) {
         copy[i] = strdup(envp[i]);
         if (!copy[i]) {
-            for (int j = 0; j <= i; j++)
+            for (int j = 0; j < i; j++)
                 free(copy[j]);
             free(copy);
             return NULL;
@@ -18,6 +18,14 @@ char **dup_env(char **envp) {
     }
     copy[count] = NULL;
     return copy;
+}
+
+void free_env(char **env) {
+    if (!env)
+        return;
+    for (int i = 0; env[i]; ++i)
+        free(env[i]);
+    free(env);
 }
 
 bool is_valid_identifier(const char *str) {

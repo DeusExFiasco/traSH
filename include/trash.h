@@ -1,6 +1,8 @@
 #ifndef TRASH_H
 #define TRASH_H
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -58,6 +60,7 @@ int builtin_export(char **argv, shell_t *shell);
 int builtin_unset(char **argv, shell_t *shell);
 
 char **dup_env(char **envp);
+void free_env(char **env);
 bool is_valid_identifier(const char *str);
 char *get_env_var(char *name, char **env);
 bool set_env(char ***envp, const char *name, const char *value);
