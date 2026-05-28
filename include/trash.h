@@ -74,7 +74,9 @@ void free_ast(ast_node_t *node);
 void handle_error(error_t error, char *context, shell_t *shell);
 void handle_fatal_error(error_t error, char *context, shell_t *shell);
 
+#if DEBUG
 void print_tokens(const token_t *tokens);
 void print_ast(const ast_node_t *node);
+#endif
 
 #endif //TRASH_H
