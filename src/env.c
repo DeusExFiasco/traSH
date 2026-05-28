@@ -10,7 +10,8 @@ char **dup_env(char **envp) {
     for (int i = 0; i < count; ++i) {
         copy[i] = strdup(envp[i]);
         if (!copy[i]) {
-            // FIXME: free already allocated entries!
+            for (int j = 0; j <= i; j++)
+                free(copy[j]);
             free(copy);
             return nullptr;
         }
@@ -92,10 +93,8 @@ int unset_env(char ***envp, const char *name) {
     return false;
 }
 
-bool append_env(char ***envp, char *name, const char *suffix) {
-    const char *old = get_env_var(name, *envp);
-    if (!old)
-        old = "";
+bool append_env(char ***envp, const char *name, const char *suffix) {
+    const char *old = get_env_var(strdup(name), *envp);
     size_t len = strlen(old) + strlen(suffix);
     char *merged = malloc(len + 1);
     if (!merged)

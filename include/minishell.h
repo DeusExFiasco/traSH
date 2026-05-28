@@ -40,6 +40,9 @@ typedef enum error {
     ENV_NOT_FOUND
 } error_t;
 
+void handle_sigint(int lmao);
+bool interrupted();
+
 token_t *tokenize_input(shell_t *shell);
 ast_node_t *parse_tokens(shell_t *shell);
 int execute(shell_t *shell);
@@ -54,7 +57,7 @@ bool is_valid_identifier(const char *str);
 char *get_env_var(char *name, char **env);
 bool set_env(char ***envp, const char *name, const char *value);
 int unset_env(char ***envp, const char *name);
-bool append_env(char ***envp, char *name, const char *suffix);
+bool append_env(char ***envp, const char *name, const char *suffix);
 
 void clean_up(shell_t *shell);
 

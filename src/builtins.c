@@ -9,13 +9,35 @@ int builtin_cd(char **argv, shell_t *shell) {
     return 0;
 }
 
+static bool is_numeric(const char *s) {
+    if (!s || !*s)
+        return false;
+    if (*s == '+' || *s == '-')
+        s++;
+    if (!*s)
+        return false;
+    while (*s) {
+        if (!isdigit((unsigned char)*s))
+            return false;
+        s++;
+    }
+    return true;
+}
+
 int builtin_exit(char **argv, shell_t *shell) {
-    int code = shell->last_status;
-    if (argv[1])
-        code = atoi(argv[1]) & 0xFF;
-    shell->last_status = code;
+    int code = 0;
+    if (!argv[1]) {
+        code = shell->last_status;
+        clean_up(shell);
+        exit(code);
+    }
+    if (argv[2] || (!is_numeric(argv[1]))) {
+        handle_error(INVALID_INPUT, argv[0], shell);
+        return shell->last_status;
+    }
+    code = atoi(argv[1]) & 0xFF;
     clean_up(shell);
-    exit(shell->last_status);
+    exit(code);
 }
 
 static bool print_exported(char **env) {
@@ -82,8 +104,14 @@ int builtin_export(char **argv, shell_t *shell) {
                 handle_error(INVALID_INPUT, argv[0], shell);
                 status = 1;
             } else if (!set_env(&shell->env, arg, eq + 1))
-                handle_error(MEMORY_ERROR, nullptr, shell);
+                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
             *eq = '=';
+        } else {
+            if (!is_valid_identifier(arg)) {
+                handle_error(INVALID_INPUT, argv[0], shell);
+                status = 1;
+            } else if (!set_env(&shell->env, arg, ""))
+                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
         }
     }
     return status;

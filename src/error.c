@@ -7,7 +7,12 @@ static void clean_exit(shell_t *shell) {
         free(shell->input);
         shell->input = nullptr;
     }
-    // FIXME: free envs!
+    if (shell->env) {
+        for (int i = 0; shell->env[i]; i++)
+            free(shell->env[i]);
+        free(shell->env);
+        shell->env = nullptr;
+    }
     if (shell->tokens) {
         free_tokens(shell->tokens);
         shell->tokens = nullptr;

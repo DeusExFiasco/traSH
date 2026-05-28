@@ -5,6 +5,8 @@ static void shell_loop(shell_t *shell) {
         shell->input = readline("$ ");
         if (shell->input == NULL)
             break;
+        if (interrupted())
+            shell->last_status = 130;
         if (shell->input[0] == '\0')
             continue;
         add_history(shell->input);
@@ -24,6 +26,9 @@ static void shell_loop(shell_t *shell) {
 int main(const int argc, char **argv, char **env) {
     (void)argc, (void)argv;
     shell_t shell = {0};
+    signal(SIGINT, handle_sigint);
+    signal(SIGQUIT, SIG_IGN);
+    signal(SIGTSTP, SIG_IGN);
     shell.last_status = 0;
     shell.env = dup_env(env);
     if (!shell.env)

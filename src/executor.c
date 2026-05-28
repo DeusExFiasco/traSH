@@ -85,8 +85,9 @@ static char *resolve_command(const char *cmd, char **env) {
 static bool is_builtin(const char *cmd) {
     return cmd && (
         strcmp(cmd, "cd") == 0 ||
-        strcmp(cmd, "exit") == 0
-        // TODO: add the rest when we have them
+        strcmp(cmd, "exit") == 0 ||
+        strcmp(cmd, "export") == 0 ||
+        strcmp(cmd, "unset") == 0
     );
 }
 
