@@ -3,7 +3,7 @@
 static void run_line(shell_t *shell, const char *line) {
     shell->input = strdup(line);
     if (!shell->input)
-        handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+        handle_fatal_error(MEMORY_ERROR, NULL, shell);
     shell->tokens = tokenize_input(shell);
     if (shell->tokens) {
         shell->ast = parse_tokens(shell);
@@ -14,7 +14,7 @@ static void run_line(shell_t *shell, const char *line) {
 }
 
 static void run_batch(shell_t *shell) {
-    char *line = nullptr;
+    char *line = NULL;
     ssize_t n;
     size_t size = 0;
     while ((n = getline(&line, &size, stdin)) != -1) {
@@ -53,7 +53,7 @@ static char *make_cool_prompt(const shell_t *shell) {
     if (!cool_prompt) {
         free(user);
         free(pwd);
-        return nullptr;
+        return NULL;
     }
     snprintf(cool_prompt, total_len,
         CLR_TEAL "%s" CLR_RED "@"
@@ -79,10 +79,14 @@ static void shell_loop(shell_t *shell) {
         add_history(shell->input);
         shell->tokens = tokenize_input(shell);
         if (shell->tokens) {
-            //print_tokens(shell->tokens);
+#if DEBUG
+            print_tokens(shell->tokens);
+#endif
             shell->ast = parse_tokens(shell);
             if (shell->ast) {
-                //print_ast(shell->ast);
+#if DEBUG
+                print_ast(shell->ast);
+#endif
                 shell->last_status = execute(shell);
             }
         }
@@ -98,7 +102,7 @@ int main(const int argc, char **argv, char **env) {
     shell.last_status = 0;
     shell.env = dup_env(env);
     if (!shell.env)
-        handle_fatal_error(ENV_NOT_FOUND, nullptr, &shell);
+        handle_fatal_error(ENV_NOT_FOUND, NULL, &shell);
     if (argc > 1) {
         run_line(&shell, argv[1]);
         return shell.last_status;

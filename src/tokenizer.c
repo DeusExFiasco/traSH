@@ -12,13 +12,13 @@ static bool is_operator(const char c) {
 
 static token_t *create_token(const token_type_t type, char *value) {
     if (!value && type != TK_EOF)
-        return nullptr;
+        return NULL;
     token_t* token = malloc(sizeof(token_t));
     if (!token)
-        return nullptr;
+        return NULL;
     token->type = type;
     token->value = value;
-    token->next = nullptr;
+    token->next = NULL;
 
     return token;
 }
@@ -67,7 +67,7 @@ static token_t *read_operator(const char *input, int *i) {
         (*i)++;
         return(create_token(TK_SEMICOLON, strdup(";")));
     }
-    return nullptr;
+    return NULL;
 }
 
 static char *extract_word(const char *input, int *i) {
@@ -103,7 +103,7 @@ static char *expand_variable(const char *word, int *i, const shell_t *shell) {
     }
     char *var_name = malloc(var_len + 1);
     if (!var_name)
-        return nullptr;
+        return NULL;
     *i = start;
     int j = 0;
     while (word[*i] && (isalnum(word[*i]) || word[*i] == '_')) {
@@ -124,7 +124,7 @@ static void update_quote_state(const char c, quote_state_t *state) {
 }
 
 static char *process_word(const char *raw, const bool is_delim, const shell_t *shell) {
-    char *result = nullptr;
+    char *result = NULL;
     quote_state_t state = QUOTE_NONE;
     int i = 0;
 
@@ -155,7 +155,7 @@ static char *process_word(const char *raw, const bool is_delim, const shell_t *s
 }
 
 token_t *tokenize_input(shell_t *shell) {
-    token_t *tokens = nullptr;
+    token_t *tokens = NULL;
     token_t *new_token;
     const char *input = shell->input;
     bool heredoc_eof_next = false;
@@ -174,16 +174,16 @@ token_t *tokenize_input(shell_t *shell) {
         else {
             char *raw_word = extract_word(input, &i);
             if (!raw_word)
-                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+                handle_fatal_error(MEMORY_ERROR, NULL, shell);
             new_token = create_token(TK_WORD, process_word(raw_word, heredoc_eof_next, shell));
             if (new_token && heredoc_eof_next)
                 heredoc_eof_next = false;
             free(raw_word);
         }
         if (!new_token)
-            handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+            handle_fatal_error(MEMORY_ERROR, NULL, shell);
         add_token(&tokens, new_token);
     }
-    add_token(&tokens, create_token(TK_EOF, nullptr));
+    add_token(&tokens, create_token(TK_EOF, NULL));
     return tokens;
 }

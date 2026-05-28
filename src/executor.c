@@ -48,7 +48,7 @@ static char *join_path(const char *dir, const char *cmd) {
     const size_t len_cmd = strlen(cmd);
     char *full_path = malloc(len_dir + 1 + len_cmd + 1);
     if (!full_path)
-        return nullptr;
+        return NULL;
     memcpy(full_path, dir, len_dir);
     full_path[len_dir] = '/';
     memcpy(full_path + len_dir + 1, cmd, len_cmd);
@@ -58,17 +58,17 @@ static char *join_path(const char *dir, const char *cmd) {
 
 static char *resolve_command(const char *cmd, char **env) {
     if (!cmd || cmd[0] == '\0')
-        return nullptr;
+        return NULL;
     if (strchr(cmd, '/')) {
         if (access(cmd, X_OK) == 0)
             return strdup(cmd);
-        return nullptr;
+        return NULL;
     }
     char *paths = get_env_var(strdup("PATH"), env);
     if (!paths)
-        return nullptr;
-    char *saveptr = nullptr;
-    for (char *path = strtok_r(paths, ":", &saveptr); path; path = strtok_r(nullptr, ":", &saveptr)) {
+        return NULL;
+    char *saveptr = NULL;
+    for (char *path = strtok_r(paths, ":", &saveptr); path; path = strtok_r(NULL, ":", &saveptr)) {
         char *candidate = join_path(path, cmd);
         if (!candidate)
             continue;
@@ -79,7 +79,7 @@ static char *resolve_command(const char *cmd, char **env) {
         free(candidate);
     }
     free(paths);
-    return nullptr;
+    return NULL;
 }
 
 static bool is_builtin(const char *cmd) {
@@ -178,7 +178,7 @@ static int exec_command(ast_node_t *node, shell_t *shell) {
         return exec_builtin(node->args, shell);
     const pid_t pid = fork();
     if (pid < 0)
-        handle_fatal_error(FORK_FAIL, nullptr, shell);
+        handle_fatal_error(FORK_FAIL, NULL, shell);
     if (pid == 0)
         exit(exec_child(node, shell));
     return wait_status(pid);
@@ -187,10 +187,10 @@ static int exec_command(ast_node_t *node, shell_t *shell) {
 static int exec_pipe(const ast_node_t *node, shell_t *shell) {
     int fds[2];
     if (pipe(fds) < 0)
-        handle_fatal_error(PIPE_FAIL, nullptr, shell);
+        handle_fatal_error(PIPE_FAIL, NULL, shell);
     const pid_t left_pid = fork();
     if (left_pid < 0)
-        handle_fatal_error(FORK_FAIL, nullptr, shell);
+        handle_fatal_error(FORK_FAIL, NULL, shell);
     if (left_pid == 0) {
         dup2(fds[1], STDOUT_FILENO);
         close(fds[0]);
@@ -199,7 +199,7 @@ static int exec_pipe(const ast_node_t *node, shell_t *shell) {
     }
     const pid_t right_pid = fork();
     if (right_pid < 0)
-        handle_fatal_error(FORK_FAIL, nullptr, shell);
+        handle_fatal_error(FORK_FAIL, NULL, shell);
     if (right_pid == 0) {
         dup2(fds[0], STDIN_FILENO);
         close(fds[0]);

@@ -1,3 +1,5 @@
+// Only relevant if DEBUG option is enabled.
+
 #include "trash.h"
 
 const char *token_to_str(const token_t token) {

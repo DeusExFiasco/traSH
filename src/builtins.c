@@ -2,8 +2,8 @@
 
 int builtin_cd(char **argv, shell_t *shell) {
     const char *arg = argv[1];
-    char *oldcwd = getcwd(nullptr, 0);
-    char *home = nullptr;
+    char *oldcwd = getcwd(NULL, 0);
+    char *home = NULL;
 
     if (!arg || arg[0] == '\0') {
         home = get_env_var(strdup("HOME"), shell->env);
@@ -23,13 +23,13 @@ int builtin_cd(char **argv, shell_t *shell) {
     }
     if (oldcwd) {
         if (!set_env(&shell->env, "OLDPWD", oldcwd))
-            handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+            handle_fatal_error(MEMORY_ERROR, NULL, shell);
         free(oldcwd);
     }
-    char *newcwd = getcwd(nullptr, 0);
+    char *newcwd = getcwd(NULL, 0);
     if (newcwd) {
         if (!set_env(&shell->env, "PWD", newcwd))
-            handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+            handle_fatal_error(MEMORY_ERROR, NULL, shell);
         free(newcwd);
     }
     free(home);
@@ -104,7 +104,7 @@ static bool print_exported(char **env) {
 int builtin_export(char **argv, shell_t *shell) {
     if (!argv[1]) {
         if (!print_exported(shell->env))
-            handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+            handle_fatal_error(MEMORY_ERROR, NULL, shell);
         return 0;
     }
 
@@ -114,14 +114,14 @@ int builtin_export(char **argv, shell_t *shell) {
         char *plus = strstr(arg, "+=");
         char *eq = strstr(arg, "=");
         if (plus && (!eq || plus > eq))
-            plus = nullptr;
+            plus = NULL;
         if (plus) {
             *plus = '\0';
             if (!is_valid_identifier(arg)) {
                 handle_error(INVALID_INPUT, argv[0], shell);
                 status = 1;
             } else if (!append_env(&shell->env, arg, plus + 2))
-                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+                handle_fatal_error(MEMORY_ERROR, NULL, shell);
             *plus = '+';
             continue;
         }
@@ -131,14 +131,14 @@ int builtin_export(char **argv, shell_t *shell) {
                 handle_error(INVALID_INPUT, argv[0], shell);
                 status = 1;
             } else if (!set_env(&shell->env, arg, eq + 1))
-                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+                handle_fatal_error(MEMORY_ERROR, NULL, shell);
             *eq = '=';
         } else {
             if (!is_valid_identifier(arg)) {
                 handle_error(INVALID_INPUT, argv[0], shell);
                 status = 1;
             } else if (!set_env(&shell->env, arg, ""))
-                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+                handle_fatal_error(MEMORY_ERROR, NULL, shell);
         }
     }
     return status;

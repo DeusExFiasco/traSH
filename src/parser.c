@@ -17,10 +17,10 @@ static void advance(token_t **current) {
 static ast_node_t *new_binary_node(ast_type_t type, ast_node_t *left, ast_node_t *right) {
     ast_node_t *node  = malloc(sizeof(ast_node_t));
     if (!node)
-        return nullptr;
+        return NULL;
     node->node_type = type;
-    node->args = nullptr;
-    node->redirs = nullptr;
+    node->args = NULL;
+    node->redirs = NULL;
     node->left = left;
     node->right = right;
     return node;
@@ -29,46 +29,46 @@ static ast_node_t *new_binary_node(ast_type_t type, ast_node_t *left, ast_node_t
 static ast_node_t *new_command_node(char **args, redirection_t *redirs) {
     ast_node_t *node  = malloc(sizeof(ast_node_t));
     if (!node)
-        return nullptr;
+        return NULL;
     node->node_type = AST_COMMAND;
     node->args = args;
     node->redirs = redirs;
-    node->left = nullptr;
-    node->right = nullptr;
+    node->left = NULL;
+    node->right = NULL;
     return node;
 }
 
 static redirection_t *new_redir(token_type_t redir_type, char *target) {
     redirection_t *redir = malloc(sizeof(redirection_t));
     if (!redir)
-        return nullptr;
+        return NULL;
     redir->redir_type = redir_type;
     redir->target = strdup(target);
     redir->heredoc_fd = -1;
-    redir->next = nullptr;
+    redir->next = NULL;
     return redir;
 }
 
 static ast_node_t *parse_command(token_t **current, shell_t *shell) {
     token_t *token = current_token(current);
-    char **argv = nullptr;
+    char **argv = NULL;
     size_t argc = 0;
-    redirection_t *redirs = nullptr;
-    redirection_t *redirs_tail = nullptr;
+    redirection_t *redirs = NULL;
+    redirection_t *redirs_tail = NULL;
 
     while (token && token->type != TK_EOF) {
         if (token->type == TK_WORD) {
             char *val = strdup(token->value ? token->value : "");
             if (!val)
-                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+                handle_fatal_error(MEMORY_ERROR, NULL, shell);
             char **new_argv = realloc(argv, sizeof(char *) * (argc + 2));
             if (!new_argv) {
                 free(val);
-                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+                handle_fatal_error(MEMORY_ERROR, NULL, shell);
             }
             argv = new_argv;
             argv[argc++] = val;
-            argv[argc] = nullptr;
+            argv[argc] = NULL;
             advance(current);
             token = current_token(current);
         } else if (token->type == TK_REDIR_IN || token->type == TK_REDIR_OUT ||
@@ -77,12 +77,12 @@ static ast_node_t *parse_command(token_t **current, shell_t *shell) {
             advance(current);
             token = current_token(current);
             if (!token || token->type != TK_WORD) {
-                handle_error(SYNTAX_ERROR, token ? token->value : nullptr, shell);
-                return nullptr;
+                handle_error(SYNTAX_ERROR, token ? token->value : NULL, shell);
+                return NULL;
             }
             redirection_t *redirection = new_redir(redir_type, token->value);
             if (!redirection)
-                handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+                handle_fatal_error(MEMORY_ERROR, NULL, shell);
             if (!redirs)
                 redirs = redirs_tail = redirection;
             else {
@@ -104,13 +104,13 @@ static ast_node_t *parse_command(token_t **current, shell_t *shell) {
 static ast_node_t *parse_pipe(token_t **current, shell_t *shell) {
     ast_node_t *left = parse_command(current, shell);
     if (!left)
-        return nullptr;
+        return NULL;
     while (current_type(current) == TK_PIPE) {
         advance(current);
         ast_node_t *right = parse_command(current, shell);
         if (!right) {
             free_ast(left);
-            return nullptr;
+            return NULL;
         }
         left = new_binary_node(AST_PIPE, left, right);
     }
@@ -120,14 +120,14 @@ static ast_node_t *parse_pipe(token_t **current, shell_t *shell) {
 static ast_node_t *parse_logical(token_t **current, shell_t *shell) {
     ast_node_t *left = parse_pipe(current, shell);
     if (!left)
-        return nullptr;
+        return NULL;
     while (current_type(current) == TK_AND || current_type(current) == TK_OR) {
         const token_type_t token_type = current_type(current);
         advance(current);
         ast_node_t *right = parse_pipe(current, shell);
         if (!right) {
             free_ast(left);
-            return nullptr;
+            return NULL;
         }
         left = new_binary_node(token_type == TK_AND ? AST_AND : AST_OR, left, right);
     }
@@ -137,13 +137,13 @@ static ast_node_t *parse_logical(token_t **current, shell_t *shell) {
 static ast_node_t *parse_sequence(token_t **current, shell_t *shell) {
     ast_node_t *left = parse_logical(current, shell);
     if (!left)
-        return nullptr;
+        return NULL;
     while (current_type(current) == TK_SEMICOLON) {
         advance(current);
         ast_node_t *right = parse_logical(current, shell);
         if (!right) {
             free_ast(left);
-            return nullptr;
+            return NULL;
         }
         left = new_binary_node(AST_SEMICOLON, left, right);
     }

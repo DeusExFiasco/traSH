@@ -1,7 +1,6 @@
-#ifndef MINISHELL_MINISHELL_H
-#define MINISHELL_MINISHELL_H
+#ifndef TRASH_H
+#define TRASH_H
 
-// ReSharper disable CppUnusedIncludeDirective
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -18,6 +17,8 @@
 
 #include "tokenizer.h"
 #include "parser.h"
+
+#define DEBUG false
 
 #define CLR_RESET "\001\033[0m\002"
 #define CLR_TEAL  "\001\033[38;5;51m\002"
@@ -73,4 +74,4 @@ void handle_fatal_error(error_t error, char *context, shell_t *shell);
 void print_tokens(const token_t *tokens);
 void print_ast(const ast_node_t *node);
 
-#endif //MINISHELL_MINISHELL_H
+#endif //TRASH_H

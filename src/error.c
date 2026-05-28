@@ -5,21 +5,21 @@ static void clean_exit(shell_t *shell) {
         return;
     if (shell->input) {
         free(shell->input);
-        shell->input = nullptr;
+        shell->input = NULL;
     }
     if (shell->env) {
         for (int i = 0; shell->env[i]; i++)
             free(shell->env[i]);
         free(shell->env);
-        shell->env = nullptr;
+        shell->env = NULL;
     }
     if (shell->tokens) {
         free_tokens(shell->tokens);
-        shell->tokens = nullptr;
+        shell->tokens = NULL;
     }
     if (shell->ast) {
         free_ast(shell->ast);
-        shell->ast = nullptr;
+        shell->ast = NULL;
     }
     exit(shell->last_status);
 }
@@ -41,7 +41,7 @@ static const char *get_error_message(const error_t error) {
 }
 
 static int get_error_status(const error_t error) {
-    static constexpr int statuses[] = {
+    static int statuses[] = {
         [INVALID_INPUT] = 1,
         [SYNTAX_ERROR] = 2,
         [COMMAND_NOT_FOUND] = 127,

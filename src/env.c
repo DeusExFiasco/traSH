@@ -6,17 +6,17 @@ char **dup_env(char **envp) {
         count++;
     char **copy = malloc(sizeof(char *) * (count + 1));
     if (!copy)
-        return nullptr;
+        return NULL;
     for (int i = 0; i < count; ++i) {
         copy[i] = strdup(envp[i]);
         if (!copy[i]) {
             for (int j = 0; j <= i; j++)
                 free(copy[j]);
             free(copy);
-            return nullptr;
+            return NULL;
         }
     }
-    copy[count] = nullptr;
+    copy[count] = NULL;
     return copy;
 }
 
@@ -74,7 +74,7 @@ bool set_env(char ***envp, const char *name, const char *value) {
         return false;
     }
     new_env[count] = key_value;
-    new_env[count + 1] = nullptr;
+    new_env[count + 1] = NULL;
     *envp = new_env;
     return true;
 }

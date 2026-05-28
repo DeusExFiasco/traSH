@@ -10,7 +10,7 @@ char *substr(const char *str, const size_t start, size_t length) {
         length = strlen(str) - start;
     char* substr = malloc(length + 1);
     if (!substr)
-        return nullptr;
+        return NULL;
     while (str[i] && length > 0) {
         if (i >= start) {
             substr[j] = str[i];
@@ -30,7 +30,7 @@ char *append_char(char *str, const char c) {
         len = strlen(str);
     char* new_str = malloc(len + 2);
     if (!new_str)
-        return nullptr;
+        return NULL;
     if (str)
         memcpy(new_str, str, len);
     new_str[len] = c;
@@ -49,7 +49,7 @@ char *append_str(char *dst, const char *src) {
         len_src = strlen(src);
     char *new_str = malloc(len_dst + len_src + 1);
     if (!new_str)
-        return nullptr;
+        return NULL;
     if (dst)
         memcpy(new_str, dst, len_dst);
     if (src)
@@ -70,7 +70,7 @@ char *itoa(const int n) {
     }
     char *str = malloc(len + 1);
     if (!str)
-        return nullptr;
+        return NULL;
     str[len] = '\0';
     if (num == 0) {
         str[0] = '0';
@@ -123,14 +123,14 @@ void clean_up(shell_t *shell) {
         return;
     if (shell->input) {
         free(shell->input);
-        shell->input = nullptr;
+        shell->input = NULL;
     }
     if (shell->tokens) {
         free_tokens(shell->tokens);
-        shell->tokens = nullptr;
+        shell->tokens = NULL;
     }
     if (shell->ast) {
         free_ast(shell->ast);
-        shell->ast = nullptr;
+        shell->ast = NULL;
     }
 }

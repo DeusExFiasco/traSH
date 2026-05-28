@@ -1,5 +1,5 @@
-#ifndef MINISHELL_PARSER_H
-#define MINISHELL_PARSER_H
+#ifndef PARSER_H
+#define PARSER_H
 
 #include "tokenizer.h"
 
@@ -26,4 +26,4 @@ typedef struct ast_node {
     struct ast_node *right;
 } ast_node_t;
 
-#endif //MINISHELL_PARSER_H
+#endif //PARSER_H
