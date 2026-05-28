@@ -1,8 +1,6 @@
 #ifndef MINISHELL_TOKENIZER_H
 #define MINISHELL_TOKENIZER_H
 
-// ReSharper disable CppUnusedIncludeDirective
-
 typedef enum token_type {
     TK_WORD, // any string
     TK_PIPE, // |

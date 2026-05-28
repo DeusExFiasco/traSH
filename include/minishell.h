@@ -19,6 +19,10 @@
 #include "tokenizer.h"
 #include "parser.h"
 
+#define CLR_RESET "\001\033[0m\002"
+#define CLR_TEAL  "\001\033[38;5;51m\002"
+#define CLR_RED   "\001\033[38;5;203m\002"
+
 typedef struct shell {
     int last_status;
     char **env;

@@ -2,7 +2,7 @@
 
 static volatile sig_atomic_t signal_received;
 
-void handle_sigint(int lmao) {
+void handle_sigint(const int lmao) {
     (void)lmao;
     signal_received = 1;
     rl_replace_line("", 0);

@@ -1,11 +1,38 @@
 #include "minishell.h"
 
 int builtin_cd(char **argv, shell_t *shell) {
-    const char *path = argv[1];
-    if (chdir(path) != 0) {
+    const char *arg = argv[1];
+    char *oldcwd = getcwd(nullptr, 0);
+    char *home = nullptr;
+
+    if (!arg || arg[0] == '\0') {
+        home = get_env_var(strdup("HOME"), shell->env);
+        if (!home || home[0] == '\0') {
+            free(oldcwd);
+            free(home);
+            handle_error(INVALID_PATH, "HOME", shell);
+            return 1;
+        }
+        arg = home;
+    }
+    if (chdir(arg) != 0) {
         handle_error(INVALID_PATH, argv[1], shell);
+        free(oldcwd);
+        free(home);
         return shell->last_status;
     }
+    if (oldcwd) {
+        if (!set_env(&shell->env, "OLDPWD", oldcwd))
+            handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+        free(oldcwd);
+    }
+    char *newcwd = getcwd(nullptr, 0);
+    if (newcwd) {
+        if (!set_env(&shell->env, "PWD", newcwd))
+            handle_fatal_error(MEMORY_ERROR, nullptr, shell);
+        free(newcwd);
+    }
+    free(home);
     return 0;
 }
 
