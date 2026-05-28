@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "trash.h"
 
 static int create_heredoc(const char *eof) {
     int fds[2];

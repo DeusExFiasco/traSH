@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "trash.h"
 
 static void run_line(shell_t *shell, const char *line) {
     shell->input = strdup(line);

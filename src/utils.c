@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "trash.h"
 
 char *substr(const char *str, const size_t start, size_t length) {
     size_t i = 0;

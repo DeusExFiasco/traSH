@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "trash.h"
 
 static void clean_exit(shell_t *shell) {
     if (!shell)

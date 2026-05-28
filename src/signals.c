@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "trash.h"
 
 static volatile sig_atomic_t signal_received;
 

@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "trash.h"
 
 char **dup_env(char **envp) {
     int count = 0;

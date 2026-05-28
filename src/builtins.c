@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "trash.h"
 
 int builtin_cd(char **argv, shell_t *shell) {
     const char *arg = argv[1];

@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "trash.h"
 
 static token_type_t current_type(token_t **current) {
     const token_t *t = *current;

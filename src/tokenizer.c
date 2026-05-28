@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "trash.h"
 
 static bool is_operator(const char c) {
     return (
